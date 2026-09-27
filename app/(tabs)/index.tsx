@@ -1,31 +1,56 @@
-import { StyleSheet } from 'react-native';
+import { useState } from "react";
+import { ScrollView, StyleSheet, Text } from "react-native";
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+import { searchDrinks } from "@/src/db/queries";
+import { colors } from "@/src/theme/colors";
+import { layout } from "@/src/theme/layout";
+import { typography } from "@/src/theme/typography";
+import { DrinkCard } from "@/src/ui/drink-card";
+import { Screen } from "@/src/ui/screen";
+import { TextField } from "@/src/ui/text-field";
 
-export default function TabOneScreen() {
+export default function BuscarScreen() {
+  const [term, setTerm] = useState("");
+  const drinks = searchDrinks(term);
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
+    <Screen title="Buscar">
+      <TextField
+        value={term}
+        onChangeText={setTerm}
+        placeholder="Nome do drink"
+        accessibilityLabel="Nome do drink"
+        autoCapitalize="none"
+      />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
+        {drinks.length === 0 ? (
+          <Text style={styles.empty}>Nenhum drink com esse nome</Text>
+        ) : (
+          drinks.map((drink) => <DrinkCard key={drink.id} drink={drink} />)
+        )}
+      </ScrollView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scroll: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  content: {
+    gap: layout.cardGap,
+    paddingBottom: 24,
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+  empty: {
+    fontFamily: typography.body.fontFamily,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    color: colors.textMuted,
+    textAlign: "center",
+    marginTop: 24,
   },
 });

@@ -1,55 +1,112 @@
-import { useFonts } from 'expo-font';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import {
+  Fraunces_600SemiBold,
+} from "@expo-google-fonts/fraunces";
+import {
+  Outfit_400Regular,
+  Outfit_600SemiBold,
+} from "@expo-google-fonts/outfit";
+import { useFonts } from "expo-font";
+import { DarkTheme, Stack, ThemeProvider } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
+import { AppState } from "react-native";
+import "react-native-reanimated";
 
-import { useColorScheme } from '@/components/useColorScheme';
+import { ensureDatabase } from "@/src/db/client";
+import { syncIfSession } from "@/src/sync/sync";
+import { colors } from "@/src/theme/colors";
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
+  initialRouteName: "(tabs)",
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+const navigationTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: colors.accent,
+    background: colors.background,
+    card: colors.surface,
+    text: colors.text,
+    border: colors.border,
+    notification: colors.accent,
+  },
+};
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    Fraunces_600SemiBold,
+    Outfit_400Regular,
+    Outfit_600SemiBold,
   });
+  const [ready, setReady] = useState(false);
+  const [dbError, setDbError] = useState<Error | null>(null);
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
   useEffect(() => {
-    if (loaded) {
+    let cancelled = false;
+    ensureDatabase()
+      .then(() => {
+        if (!cancelled) {
+          setReady(true);
+        }
+      })
+      .catch((cause: unknown) => {
+        if (!cancelled) {
+          setDbError(cause instanceof Error ? cause : new Error(String(cause)));
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (loaded && ready) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, ready]);
 
-  if (!loaded) {
+  useEffect(() => {
+    if (!loaded || !ready) {
+      return;
+    }
+    void syncIfSession();
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") {
+        void syncIfSession();
+      }
+    });
+    return () => subscription.remove();
+  }, [loaded, ready]);
+
+  if (dbError) {
+    throw dbError;
+  }
+
+  if (!loaded || !ready) {
     return null;
   }
 
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+    <ThemeProvider value={navigationTheme}>
+      <StatusBar style="light" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+        }}
+      >
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="drink/[id]" />
       </Stack>
     </ThemeProvider>
   );
