@@ -14,6 +14,11 @@ export type DrinkIngredientDetail = {
   unit: string;
 };
 
+export type DrinkIngredientName = {
+  id: string;
+  name: string;
+};
+
 export type DrinkDetail = DrinkListItem & {
   description: string;
   steps: string[];

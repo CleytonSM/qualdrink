@@ -9,6 +9,12 @@ export const ingredientCategoryOrder = [
   "outro",
 ] as const satisfies readonly IngredientCategory[];
 
+export const drinkCategoryOrder = [
+  "brasileiro",
+  "classico",
+  "sem_alcool",
+] as const satisfies readonly DrinkCategory[];
+
 const ingredientLabels: Record<IngredientCategory, string> = {
   destilado: "Destilado",
   citrico: "Cítrico",

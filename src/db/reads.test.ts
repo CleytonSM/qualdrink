@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import { DatabaseSync } from "node:sqlite";
 import { test } from "node:test";
 
+import { ingredientLine } from "../data/ingredient-line";
 import { insertCatalog, schemaSql, type SqlBind } from "./schema";
 import {
   getDrinkIn,
   identifyDrinksIn,
+  listIngredientNamesByDrinkIn,
   listVisibleFavoritesIn,
   searchDrinksIn,
   type SqlDb,
@@ -101,6 +103,14 @@ test("id de ingrediente não entra concatenado no SQL", () => {
   const hits = identifyDrinksIn(db, ["limao'); drop table drinks;--"]);
   assert.equal(hits.length, 0);
   assert.equal(searchDrinksIn(db, "").length, 14);
+});
+
+test("linha de ingredientes segue a ordem da receita e omite gelo", () => {
+  const byDrink = listIngredientNamesByDrinkIn(openCatalog());
+  assert.equal(byDrink.size, 14);
+  assert.equal(ingredientLine(byDrink.get("caipirinha")), "Cachaça · Limão · Açúcar");
+  assert.equal(ingredientLine(byDrink.get("negroni")), "Gin · Campari · Vermute rosso");
+  assert.equal(ingredientLine(undefined), "");
 });
 
 test("receita da caipirinha e drink inexistente", () => {

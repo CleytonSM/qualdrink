@@ -29,7 +29,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPadding,
     paddingVertical: 12,
     color: colors.text,
+    minHeight: layout.minTouch,
     fontFamily: typography.body.fontFamily,
     fontSize: typography.body.fontSize,
+    includeFontPadding: false,
   },
 });

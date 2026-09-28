@@ -5,6 +5,7 @@ import type { SqlBind } from "@/src/db/schema";
 import type {
   DrinkDetail,
   DrinkIngredientDetail,
+  DrinkIngredientName,
   DrinkListItem,
   IdentifyHit,
   Ingredient,
@@ -188,6 +189,22 @@ export function listIngredientsIn(db: SqlDb): Ingredient[] {
       name: row.name,
       category: ingredientCategory(row.category),
     }));
+}
+
+export function listIngredientNamesByDrinkIn(db: SqlDb): Map<string, DrinkIngredientName[]> {
+  const rows = db.all<{ drink_id: string; id: string; name: string }>(
+    `select di.drink_id as drink_id, di.ingredient_id as id, i.name as name
+     from drink_ingredients di
+     join ingredients i on i.id = di.ingredient_id
+     order by di.drink_id asc, di.rowid asc`,
+  );
+  const byDrink = new Map<string, DrinkIngredientName[]>();
+  for (const row of rows) {
+    const list = byDrink.get(row.drink_id) ?? [];
+    list.push({ id: row.id, name: row.name });
+    byDrink.set(row.drink_id, list);
+  }
+  return byDrink;
 }
 
 export function listVisibleFavoritesIn(db: SqlDb, viewerUserId: string | null): DrinkListItem[] {

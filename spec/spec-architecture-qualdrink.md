@@ -229,6 +229,7 @@ Tipo:
 | Nome de drink em lista | Fraunces | 22 | 600 |
 | Corpo e passos | Outfit | 16 | 400 |
 | Rótulo, aba, chip | Outfit | 14 | 600 |
+| Percentual de cobertura | Outfit | 22 | 600 |
 
 Raios: cartão `16`, campo `12`, chip e botão `999`. Padding horizontal de tela `16`. Espaço entre cartões `12`.
 
@@ -372,6 +373,7 @@ identifyDrinks(ingredientIds: string[]): IdentifyHit[]
 getDrink(id: string): DrinkDetail | null
 listIngredients(): Ingredient[]
 listVisibleFavorites(viewerUserId: string | null): DrinkListItem[]
+listIngredientNamesByDrink(): Map<string, { id, name }[]>
 setFavorite(drinkId: string, favorite: boolean, viewerUserId: string | null): void
 claimAnonymousFavorites(userId: string): void
 ```
@@ -387,6 +389,8 @@ claimAnonymousFavorites(userId: string): void
 `Ingredient`: `id`, `name`, `category`.
 
 `SyncResult`: `{ ok: true, syncedAt: number } | { ok: false, message: string }`.
+
+`listIngredientNamesByDrink` lê `drink_ingredients` com `JOIN` em `ingredients`, na ordem da receita. Buscar e Favoritos usam essa leitura para mostrar, em cada linha, os ingredientes do drink sem o gelo. Em Buscar, a categoria vira cabeçalho de seção (Brasileiro, Clássico, Sem álcool).
 
 Busca, termo vazio após `trim` retorna todos os drinks ordenados por `name` crescente.
 

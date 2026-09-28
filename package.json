@@ -9,6 +9,7 @@
     "expo": "~57.0.25",
     "expo-constants": "~57.0.19",
     "expo-font": "~57.0.4",
+    "expo-haptics": "~57.0.3",
     "expo-linking": "~57.0.11",
     "expo-router": "~57.0.23",
     "expo-secure-store": "~57.0.4",
@@ -28,6 +29,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~57.0.2",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3"
   },
@@ -37,7 +40,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "postinstall": "node scripts/patch-metro-worker-chunks.js",
-    "test": "tsx --test src/data/fold.test.ts src/db/reads.test.ts src/db/favorites.test.ts src/auth/credentials.test.ts src/sync/conflict.test.ts"
+    "test": "tsx --test src/data/fold.test.ts src/db/reads.test.ts src/db/favorites.test.ts src/auth/credentials.test.ts src/sync/conflict.test.ts",
+    "lint": "expo lint"
   },
   "private": true
 }

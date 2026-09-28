@@ -4,12 +4,19 @@ import { readMeta } from "@/src/db/meta";
 import {
   getDrinkIn,
   identifyDrinksIn,
+  listIngredientNamesByDrinkIn,
   listIngredientsIn,
   listVisibleFavoritesIn,
   readViewerUserId,
   searchDrinksIn,
 } from "@/src/db/reads";
-import type { DrinkDetail, DrinkListItem, IdentifyHit, Ingredient } from "@/src/db/types";
+import type {
+  DrinkDetail,
+  DrinkIngredientName,
+  DrinkListItem,
+  IdentifyHit,
+  Ingredient,
+} from "@/src/db/types";
 
 export type SyncStatus =
   | { kind: "never" }
@@ -39,6 +46,10 @@ export function getDrink(id: string): DrinkDetail | null {
 
 export function listIngredients(): Ingredient[] {
   return listIngredientsIn(database());
+}
+
+export function listIngredientNamesByDrink(): Map<string, DrinkIngredientName[]> {
+  return listIngredientNamesByDrinkIn(database());
 }
 
 export function listVisibleFavorites(viewerUserId: string | null): DrinkListItem[] {

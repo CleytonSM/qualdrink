@@ -21,7 +21,11 @@ function TabIcon({ color, name }: { color: ColorValue; name: TabIconName }) {
 }
 
 function TabLabel({ color, children }: { color: ColorValue; children: string }) {
-  return <Text style={[styles.label, { color }]}>{children}</Text>;
+  return (
+    <Text maxFontSizeMultiplier={1.4} style={[styles.label, { color }]}>
+      {children}
+    </Text>
+  );
 }
 
 export default function TabLayout() {
@@ -85,11 +89,12 @@ const styles = StyleSheet.create({
   bar: {
     backgroundColor: colors.background,
     borderTopColor: colors.border,
-    borderTopWidth: 1,
+    borderTopWidth: StyleSheet.hairlineWidth,
   },
   label: {
     fontFamily: typography.label.fontFamily,
     fontSize: typography.label.fontSize,
     lineHeight: typography.label.lineHeight,
+    includeFontPadding: false,
   },
 });

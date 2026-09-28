@@ -18,6 +18,16 @@ export function toggleIngredient(id: string): void {
   }
 }
 
+export function clearSelection(): void {
+  if (selectedIds.length === 0) {
+    return;
+  }
+  selectedIds = [];
+  for (const listener of listeners) {
+    listener();
+  }
+}
+
 export function subscribeSelection(listener: () => void): () => void {
   listeners.add(listener);
   return () => {
