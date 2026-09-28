@@ -1,7 +1,8 @@
+import { SymbolView } from "expo-symbols";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { drinkCategoryLabel } from "@/src/data/labels";
 import { getDrink, getViewerUserId, setFavorite } from "@/src/db/queries";
@@ -10,7 +11,10 @@ import { subscribeDataChanged, syncIfSession } from "@/src/sync/sync";
 import { colors } from "@/src/theme/colors";
 import { layout } from "@/src/theme/layout";
 import { typography } from "@/src/theme/typography";
-import { Button } from "@/src/ui/button";
+import { DoseGlass, doseLayers } from "@/src/ui/dose-glass";
+import { EmptyState } from "@/src/ui/empty-state";
+import { confirmHaptic } from "@/src/ui/haptics";
+import { PressableScale } from "@/src/ui/pressable-scale";
 
 function drinkIdFromParam(id: string | string[] | undefined): string | undefined {
   if (Array.isArray(id)) {
@@ -27,7 +31,42 @@ function goBack() {
   router.replace("/");
 }
 
+function FavoriteButton({ active, onPress }: { active: boolean; onPress: () => void }) {
+  return (
+    <PressableScale
+      accessibilityLabel={active ? "Desfavoritar" : "Favoritar"}
+      accessibilityState={{ selected: active }}
+      onPress={onPress}
+      rippleColor={active ? colors.text : colors.accent}
+      style={[styles.favorite, active && styles.favoriteActive]}
+    >
+      <SymbolView
+        name={
+          active
+            ? { ios: "heart.fill", android: "favorite", web: "favorite" }
+            : { ios: "heart", android: "favorite_border", web: "favorite_border" }
+        }
+        tintColor={active ? colors.text : colors.accent}
+        size={18}
+      />
+      <Text maxFontSizeMultiplier={1.3} style={styles.favoriteLabel}>
+        {active ? "Favorito" : "Favoritar"}
+      </Text>
+    </PressableScale>
+  );
+}
+
+function SectionHead({ title, meta }: { title: string; meta: string }) {
+  return (
+    <View style={styles.sectionHead}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text style={styles.sectionMeta}>{meta}</Text>
+    </View>
+  );
+}
+
 export default function DrinkScreen() {
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id: string }>();
   const id = drinkIdFromParam(params.id);
   const [drink, setDrink] = useState<DrinkDetail | null>(() => (id ? getDrink(id) : null));
@@ -48,47 +87,110 @@ export default function DrinkScreen() {
     if (!drink) {
       return;
     }
+    confirmHaptic();
     setFavorite(drink.id, !drink.isFavorite, getViewerUserId());
     reload();
     void syncIfSession();
   }
 
+  const layers = drink ? doseLayers(drink.ingredients) : [];
+  const opacityById = new Map(layers.map((layer) => [layer.id, layer.opacity]));
+  const categoryIsAlcoholFree = drink?.category === "sem_alcool";
+  const showAlcoholFree = drink ? !drink.alcoholic && !categoryIsAlcoholFree : false;
+
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      <Pressable accessibilityRole="button" onPress={goBack} style={styles.back}>
-        <Text style={styles.backLabel}>Voltar</Text>
-      </Pressable>
-      {drink ? (
-        <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.title}>{drink.name}</Text>
-          <Text style={styles.category}>{drinkCategoryLabel(drink.category)}</Text>
-          {drink.alcoholic ? null : <Text style={styles.alcoholFree}>Sem álcool</Text>}
-          <Text style={styles.body}>{drink.description}</Text>
-          <Text style={styles.section}>Ingredientes</Text>
-          {drink.ingredients.map((item) => (
-            <View key={item.id} style={styles.ingredientRow}>
-              <Text style={styles.body}>{item.name}</Text>
-              <Text style={styles.dose}>
-                {item.amount} {item.unit}
-              </Text>
-            </View>
-          ))}
-          <Text style={styles.section}>Preparo</Text>
-          {drink.steps.map((step, index) => (
-            <Text key={`${index}-${step}`} style={styles.body}>
-              {index + 1}. {step}
+    <SafeAreaView style={styles.safe} edges={["top"]}>
+      <View style={styles.frame}>
+        <View style={styles.bar}>
+          <PressableScale
+            accessibilityLabel="Voltar"
+            onPress={goBack}
+            rippleColor={colors.textMuted}
+            style={styles.back}
+          >
+            <SymbolView
+              name={{ ios: "chevron.left", android: "arrow_back", web: "arrow_back" }}
+              tintColor={colors.text}
+              size={22}
+            />
+            <Text maxFontSizeMultiplier={1.4} style={styles.backLabel}>
+              Voltar
             </Text>
-          ))}
-          <Button
-            label={drink.isFavorite ? "Desfavoritar" : "Favoritar"}
-            onPress={toggleFavorite}
-          />
-        </ScrollView>
-      ) : (
-        <View style={styles.missing}>
-          <Text style={styles.title}>Drink não encontrado</Text>
+          </PressableScale>
+          {drink ? <FavoriteButton active={drink.isFavorite} onPress={toggleFavorite} /> : null}
         </View>
-      )}
+        {drink ? (
+          <ScrollView
+            contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}
+          >
+            <View style={styles.hero}>
+              <Text style={[styles.eyebrow, categoryIsAlcoholFree && styles.amberText]}>
+                {drinkCategoryLabel(drink.category)}
+                {showAlcoholFree ? <Text style={styles.amberText}> · Sem álcool</Text> : null}
+              </Text>
+              <Text style={styles.title}>{drink.name}</Text>
+              <Text style={styles.description}>{drink.description}</Text>
+            </View>
+
+            <View style={styles.section}>
+              <SectionHead
+                title="Ingredientes"
+                meta={String(drink.ingredients.length)}
+              />
+              <View style={styles.dosage}>
+                {layers.length > 0 ? <DoseGlass layers={layers} /> : null}
+                <View style={styles.ingredients}>
+                  {drink.ingredients.map((item, index) => {
+                    const opacity = opacityById.get(item.id);
+                    const last = index === drink.ingredients.length - 1;
+                    return (
+                      <View
+                        key={item.id}
+                        style={[styles.ingredientRow, last && styles.rowLast]}
+                      >
+                        {opacity !== undefined ? (
+                          <View style={[styles.swatch, { opacity }]} />
+                        ) : (
+                          <View style={styles.swatchEmpty} />
+                        )}
+                        <Text style={styles.ingredientName}>{item.name}</Text>
+                        <Text style={styles.dose}>
+                          {item.amount} {item.unit}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <SectionHead
+                title="Preparo"
+                meta={drink.steps.length === 1 ? "1 passo" : `${drink.steps.length} passos`}
+              />
+              <View>
+                {drink.steps.map((step, index) => {
+                  const last = index === drink.steps.length - 1;
+                  return (
+                    <View key={`${index}-${step}`} style={[styles.stepRow, last && styles.rowLast]}>
+                      <Text style={styles.stepIndex}>{index + 1}</Text>
+                      <Text style={styles.stepText}>{step}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          </ScrollView>
+        ) : (
+          <EmptyState
+            label="Drink não encontrado"
+            body="O endereço aponta para uma receita que não está no catálogo."
+            icon={{ ios: "magnifyingglass", android: "search" }}
+            action={{ label: "Ir para Buscar", onPress: () => router.replace("/") }}
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -98,69 +200,181 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  frame: {
+    flex: 1,
+    width: "100%",
+    maxWidth: layout.webMaxWidth,
+    alignSelf: "center",
+  },
+  bar: {
+    minHeight: layout.minTouch + 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingLeft: 8,
+    paddingRight: layout.screenPadding,
+  },
   back: {
-    paddingHorizontal: layout.screenPadding,
-    paddingVertical: 8,
-    alignSelf: "flex-start",
+    minHeight: layout.minTouch,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingRight: 12,
+    overflow: "hidden",
   },
   backLabel: {
     fontFamily: typography.label.fontFamily,
     fontSize: typography.label.fontSize,
     lineHeight: typography.label.lineHeight,
     color: colors.text,
+    includeFontPadding: false,
+  },
+  favorite: {
+    minHeight: layout.minTouch - 4,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    borderRadius: layout.radiusPill,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    overflow: "hidden",
+  },
+  favoriteActive: {
+    backgroundColor: colors.accent,
+  },
+  favoriteLabel: {
+    fontFamily: typography.label.fontFamily,
+    fontSize: typography.label.fontSize,
+    lineHeight: typography.label.lineHeight,
+    color: colors.text,
+    includeFontPadding: false,
   },
   content: {
     paddingHorizontal: layout.screenPadding,
-    paddingBottom: 32,
-    gap: layout.cardGap,
+    gap: 28,
   },
-  missing: {
-    flex: 1,
-    paddingHorizontal: layout.screenPadding,
-    justifyContent: "center",
+  hero: {
+    gap: 8,
+    paddingTop: 12,
+  },
+  eyebrow: {
+    fontFamily: typography.label.fontFamily,
+    fontSize: typography.label.fontSize,
+    lineHeight: typography.label.lineHeight,
+    color: colors.textMuted,
+    includeFontPadding: false,
+  },
+  amberText: {
+    color: colors.amber,
   },
   title: {
     fontFamily: typography.screenTitle.fontFamily,
     fontSize: typography.screenTitle.fontSize,
     lineHeight: typography.screenTitle.lineHeight,
     color: colors.text,
+    includeFontPadding: false,
   },
-  category: {
-    fontFamily: typography.label.fontFamily,
-    fontSize: typography.label.fontSize,
-    lineHeight: typography.label.lineHeight,
+  description: {
+    fontFamily: typography.body.fontFamily,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
     color: colors.textMuted,
   },
-  alcoholFree: {
-    fontFamily: typography.label.fontFamily,
-    fontSize: typography.label.fontSize,
-    lineHeight: typography.label.lineHeight,
-    color: colors.amber,
-  },
   section: {
+    gap: 12,
+  },
+  sectionHead: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 8,
+    paddingBottom: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  sectionTitle: {
     fontFamily: typography.label.fontFamily,
     fontSize: typography.label.fontSize,
     lineHeight: typography.label.lineHeight,
     color: colors.text,
-    marginTop: 8,
+    includeFontPadding: false,
   },
-  body: {
+  sectionMeta: {
+    fontFamily: typography.body.fontFamily,
+    fontSize: typography.label.fontSize,
+    lineHeight: typography.label.lineHeight,
+    color: colors.textMuted,
+    includeFontPadding: false,
+  },
+  dosage: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 20,
+  },
+  ingredients: {
+    flex: 1,
+  },
+  ingredientRow: {
+    minHeight: layout.minTouch,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  rowLast: {
+    borderBottomWidth: 0,
+  },
+  swatch: {
+    width: 10,
+    height: 10,
+    borderRadius: 3,
+    backgroundColor: colors.amber,
+  },
+  swatchEmpty: {
+    width: 10,
+    height: 10,
+    borderRadius: 3,
+    borderWidth: 1,
+    borderColor: colors.textMuted,
+  },
+  ingredientName: {
+    flex: 1,
     fontFamily: typography.body.fontFamily,
     fontSize: typography.body.fontSize,
     lineHeight: typography.body.lineHeight,
     color: colors.text,
-    flexShrink: 1,
-  },
-  ingredientRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: layout.cardGap,
   },
   dose: {
+    flexShrink: 1,
+    textAlign: "right",
     fontFamily: typography.label.fontFamily,
     fontSize: typography.label.fontSize,
     lineHeight: typography.label.lineHeight,
     color: colors.amber,
+    fontVariant: ["tabular-nums"],
+    includeFontPadding: false,
+  },
+  stepRow: {
+    flexDirection: "row",
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  stepIndex: {
+    width: 22,
+    fontFamily: typography.label.fontFamily,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    color: colors.textMuted,
+    fontVariant: ["tabular-nums"],
+  },
+  stepText: {
+    flex: 1,
+    fontFamily: typography.body.fontFamily,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    color: colors.text,
   },
 });

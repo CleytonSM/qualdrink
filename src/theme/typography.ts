@@ -25,4 +25,10 @@ export const typography = {
     fontSize: 14,
     lineHeight: 18,
   },
+  /** Percentual de cobertura: é uma medida, lida de relance. */
+  measure: {
+    fontFamily: fonts.label,
+    fontSize: 22,
+    lineHeight: 26,
+  },
 } as const;

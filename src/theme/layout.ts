@@ -4,4 +4,6 @@ export const layout = {
   radiusPill: 999,
   screenPadding: 16,
   cardGap: 12,
+  minTouch: 44,
+  webMaxWidth: 720,
 } as const;

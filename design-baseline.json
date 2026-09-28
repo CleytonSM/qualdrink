@@ -1,0 +1,68 @@
+{
+  "tool": "mobile-redesign-app",
+  "version": 3,
+  "date": "2026-09-27",
+  "pass": "static, then web preview at 390x844 (headless Edge)",
+  "mode": "overhaul within spec tokens",
+  "designScore": "A",
+  "slopScore": "A",
+  "categories": {
+    "navigation": "A",
+    "screenAnatomy": "A",
+    "typography": "A",
+    "color": "A",
+    "surfaces": "A",
+    "states": "A",
+    "interaction": "A",
+    "forms": "A",
+    "performance": "A",
+    "copy": "A"
+  },
+  "dialsBefore": { "expression": 6, "motion": 5, "density": 4 },
+  "dialsAfter": { "expression": 6, "motion": 5, "density": 4 },
+  "findings": [
+    { "id": "FINDING-001", "impact": "medium", "category": "surfaces", "summary": "Recipe and account were flat text with the same card treatment as tappable drinks", "tell": 3, "status": "fixed" },
+    { "id": "FINDING-002", "impact": "high", "category": "interaction", "summary": "Ingredient chips and the back control were under 44pt", "tell": 19, "status": "fixed" },
+    { "id": "FINDING-003", "impact": "medium", "category": "states", "summary": "Empty lists were a single muted sentence with no way forward", "tell": 38, "status": "fixed" },
+    { "id": "FINDING-004", "impact": "medium", "category": "forms", "summary": "Conta used placeholder-as-label", "tell": 34, "status": "fixed" },
+    { "id": "FINDING-005", "impact": "medium", "category": "interaction", "summary": "Press feedback was an opacity flash", "tell": 35, "status": "fixed" },
+    { "id": "FINDING-006", "impact": "medium", "category": "performance", "summary": "Drink lists used ScrollView over a catalog that sync can grow", "tell": 13, "status": "fixed" },
+    { "id": "FINDING-007", "impact": "medium", "category": "surfaces", "summary": "Buscar and Favoritos were a stack of identical cards for plain navigation rows", "tell": 3, "status": "fixed" },
+    { "id": "FINDING-008", "impact": "medium", "category": "screenAnatomy", "summary": "Identificar results sat below 29 chips with no way to reach them without scrolling blind", "status": "fixed" },
+    { "id": "FINDING-009", "impact": "medium", "category": "color", "summary": "Back control used the accent, which the spec reserves for primary action, active tab and active favorite", "status": "fixed" },
+    { "id": "FINDING-010", "impact": "polish", "category": "copy", "summary": "Non-alcoholic drinks showed 'Sem álcool' twice (category and badge)", "status": "fixed" },
+    { "id": "FINDING-011", "impact": "polish", "category": "surfaces", "summary": "Recipe doses were numbers only; the spec's amber-as-liquid idea had no visual", "status": "fixed" },
+    { "id": "FINDING-012", "impact": "medium", "category": "copy", "summary": "Buscar rows repeated 'Clássico' on 11 of 14 lines and said nothing about what is in the drink; rows now carry the ingredient line and the category became the section header", "status": "fixed" },
+    { "id": "FINDING-013", "impact": "medium", "category": "typography", "summary": "Uppercase letter-spaced eyebrows (BRASILEIRO, INGREDIENTES, PREPARO) were the dark-editorial template rhythm; replaced by sentence-case heads with a muted count", "status": "fixed" },
+    { "id": "FINDING-014", "impact": "medium", "category": "screenAnatomy", "summary": "Recipe spent ~80pt on a sticky full-width pink pill for favoriting; favorite moved to the top bar and the footer removed", "tell": 7, "status": "fixed" },
+    { "id": "FINDING-015", "impact": "polish", "category": "surfaces", "summary": "Preparo used a generic circle-and-rail stepper; now hanging numerals with hairlines", "status": "fixed" },
+    { "id": "FINDING-016", "impact": "medium", "category": "color", "summary": "Spec 4.8 requires 'Sem álcool' in amber; it rendered in textMuted", "status": "fixed" },
+    { "id": "FINDING-017", "impact": "polish", "category": "surfaces", "summary": "Identificar group counts were amber badge circles; now plain '1 de 11' text in amber", "tell": 10, "status": "fixed" },
+    { "id": "FINDING-018", "impact": "polish", "category": "screenAnatomy", "summary": "Camera notice was a 90pt dashed box above the chips; now a one-line caption", "status": "fixed" },
+    { "id": "FINDING-019", "impact": "medium", "category": "states", "summary": "Empty states ended in a full-width pink pill; search empty now explains the fold rule and points to Identificar, favorites empty says how the list fills", "status": "fixed" },
+    { "id": "FINDING-020", "impact": "medium", "category": "forms", "summary": "Password rule only appeared after an error, and 'Criar conta' had the same weight as 'Entrar'", "status": "fixed" },
+    { "id": "FINDING-021", "impact": "polish", "category": "copy", "summary": "Sync error rendered 'Não sincronizado' twice (title plus stored message)", "status": "fixed" },
+    { "id": "FINDING-022", "impact": "polish", "category": "screenAnatomy", "summary": "Coverage percent was 14pt label text; now the measure role with tabular figures", "status": "fixed" }
+  ],
+  "dismissed": [
+    "Tell 27: drink back is the only back affordance; the stack header stays hidden so the title is not repeated.",
+    "Tell 26: Conta keeps auth on the tab because the spec is browse-first.",
+    "Tell 5: the selection tray has shadowColor with a sibling elevation.",
+    "Thumb zone: the recipe favorite sits top-right, the iOS convention for a secondary action on a reading screen (Music, Podcasts).",
+    "Light mode: out of this version; tokens are dark-only.",
+    "Skeletons and pull-to-refresh: the first paint waits on the splash, and lists read SQLite."
+  ],
+  "unverified": [
+    "software keyboard on iOS and Android",
+    "1.3x font scale on the tab bar, the tray and the recipe top bar",
+    "Android edge-to-edge insets",
+    "haptics on a physical device",
+    "splash to first screen on a device",
+    "sticky section headers in Buscar on iOS and Android"
+  ],
+  "knownPlatformIssues": [
+    "Web only: expo-sqlite's synchronous write can throw 'Sync operation timeout' when the worker is slow on a cold bundle; the favorite is still written. Seen again on the first run of this pass, not on the second."
+  ],
+  "lint": "expo lint was not configured before this pass; it installed eslint-config-expo and reports 1 error and 1 warning in files this pass did not touch (src/supabase/client.ts dynamic env access, src/db/client.ts Array<T>).",
+  "risk": "5%"
+}

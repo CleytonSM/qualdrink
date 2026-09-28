@@ -14,8 +14,10 @@ type ScreenProps = {
 export function Screen({ title, children }: ScreenProps) {
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
-      <View style={styles.body}>
-        <Text style={styles.title}>{title}</Text>
+      <View style={styles.frame}>
+        <Text maxFontSizeMultiplier={1.4} style={styles.title}>
+          {title}
+        </Text>
         {children}
       </View>
     </SafeAreaView>
@@ -27,8 +29,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  body: {
+  frame: {
     flex: 1,
+    width: "100%",
+    maxWidth: layout.webMaxWidth,
+    alignSelf: "center",
     paddingHorizontal: layout.screenPadding,
     paddingTop: 8,
     gap: layout.cardGap,
@@ -38,5 +43,6 @@ const styles = StyleSheet.create({
     fontSize: typography.screenTitle.fontSize,
     lineHeight: typography.screenTitle.lineHeight,
     color: colors.text,
+    includeFontPadding: false,
   },
 });

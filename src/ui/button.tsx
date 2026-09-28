@@ -1,46 +1,69 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import type { ReactNode } from "react";
+import { StyleSheet, Text } from "react-native";
 
 import { colors } from "@/src/theme/colors";
 import { layout } from "@/src/theme/layout";
 import { typography } from "@/src/theme/typography";
+import { PressableScale } from "@/src/ui/pressable-scale";
 
 type ButtonProps = {
   label: string;
   onPress: () => void;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "quiet";
+  size?: "regular" | "compact";
+  icon?: ReactNode;
   disabled?: boolean;
+  accessibilityLabel?: string;
 };
 
-export function Button({ label, onPress, variant = "primary", disabled = false }: ButtonProps) {
+export function Button({
+  label,
+  onPress,
+  variant = "primary",
+  size = "regular",
+  icon,
+  disabled = false,
+  accessibilityLabel,
+}: ButtonProps) {
   const primary = variant === "primary";
 
   return (
-    <Pressable
-      accessibilityRole="button"
+    <PressableScale
+      accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [
+      rippleColor={primary ? colors.text : colors.textMuted}
+      style={[
         styles.base,
-        primary ? styles.primary : styles.secondary,
-        pressed && !disabled && styles.pressed,
+        size === "compact" && styles.compact,
+        styles[variant],
         disabled && styles.disabled,
       ]}
     >
-      <Text style={[styles.label, primary ? styles.primaryLabel : styles.secondaryLabel]}>
+      {icon}
+      <Text maxFontSizeMultiplier={1.4} style={styles.label}>
         {label}
       </Text>
-    </Pressable>
+    </PressableScale>
   );
 }
 
 const styles = StyleSheet.create({
   base: {
+    minHeight: layout.minTouch,
     borderRadius: layout.radiusPill,
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: layout.screenPadding,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
     borderWidth: 1,
+    overflow: "hidden",
+  },
+  compact: {
+    paddingVertical: 10,
   },
   primary: {
     backgroundColor: colors.accent,
@@ -50,8 +73,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceRaised,
     borderColor: colors.border,
   },
-  pressed: {
-    opacity: 0.85,
+  quiet: {
+    backgroundColor: "transparent",
+    borderColor: "transparent",
   },
   disabled: {
     opacity: 0.5,
@@ -60,11 +84,7 @@ const styles = StyleSheet.create({
     fontFamily: typography.label.fontFamily,
     fontSize: typography.label.fontSize,
     lineHeight: typography.label.lineHeight,
-  },
-  primaryLabel: {
     color: colors.text,
-  },
-  secondaryLabel: {
-    color: colors.text,
+    includeFontPadding: false,
   },
 });

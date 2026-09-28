@@ -11,4 +11,6 @@ export const colors = {
   border: "#342C28",
   accent: "#FF2E63",
   amber: "#F0B429",
+  /** Âmbar translúcido para o enchimento de cobertura; mesma cor, não uma segunda paleta. */
+  amberWash: "#F0B4291F",
 } as const;
