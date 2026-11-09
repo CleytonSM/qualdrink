@@ -2,6 +2,12 @@
 
 Aplicativo Expo (SDK 57) para buscar drinks, identificar por ingredientes e guardar favoritos. A leitura fica no SQLite do aparelho. Conta e sincronização usam o projeto Supabase de testes.
 
+A v2 adiciona ingredientes por foto: câmera ou galeria, análise online com login e
+revisão antes de acrescentar itens à seleção. A configuração do servidor e o
+roteiro de avaliação estão em [Visão computacional v2](spec/aceite-vision-v2.md).
+O reconhecimento usa a API OpenAI pelo Supabase; a chave fica somente no servidor.
+Sem essa configuração, busca e identificação manual continuam disponíveis.
+
 ## Ambiente de testes
 
 O roteiro de aceite roda no **Expo Go para Android**, no projeto Supabase `yyhxqasurvmaxeqrxffu`. Busca, identificação e favoritos funcionam sem rede. Entrar, criar conta e sincronizar precisam do `.env` e de internet.
@@ -55,7 +61,19 @@ A senha precisa ter ao menos 6 caracteres.
 npm start
 ```
 
-No celular, abra o Expo Go e escaneie o QR code do terminal. O primeiro lançamento cria o banco `qualdrink.db` e carrega o catálogo (14 drinks).
+No celular, abra o Expo Go e escaneie o QR code do terminal. O primeiro lançamento cria o banco `qualdrink.db` e carrega o catálogo (15 drinks).
+
+Para Android conectado por USB, habilite a depuração USB, autorize o computador
+no celular e, com `adb devices` mostrando o aparelho como `device`, use:
+
+```bash
+npm run android:usb
+```
+
+Esse comando redireciona a porta 8081 pelo ADB e inicia o Expo Go com o servidor
+em IPv4. No Windows, `--localhost` sozinho pode escutar apenas em `::1` (IPv6),
+enquanto o USB acessa `127.0.0.1`; isso causa `Failed to download remote update`.
+Encerre o servidor anterior com Ctrl+C antes de iniciar outro na mesma porta.
 
 Se o celular não alcançar o computador, use túnel:
 
@@ -68,7 +86,7 @@ npx expo start --tunnel
 | Aba | Sem conta | Com conta e rede |
 | --- | --- | --- |
 | Buscar | Lista e filtro por nome | Igual |
-| Identificar | Chips de ingredientes e cobertura | Igual. O aviso de câmera não abre a câmera |
+| Identificar | Chips de ingredientes e cobertura | Câmera/galeria, prévia e revisão; análise exige a função configurada e cota disponível |
 | Favoritos | Grava no aparelho | Sobe e desce no sync |
 | Conta | `Entrar` e `Criar conta` | `Sincronizar` e `Sair` |
 

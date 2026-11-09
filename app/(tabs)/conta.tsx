@@ -197,7 +197,7 @@ export default function ContaScreen() {
             contentContainerStyle={styles.page}
           >
             <Text style={styles.muted}>
-              Busca, identificação e favoritos funcionam sem conta. Entre para levar seus
+              Busca, identificação manual e favoritos funcionam sem conta. Entre para analisar fotos e levar seus
               favoritos para outro aparelho.
             </Text>
             <View style={styles.fields}>

@@ -33,11 +33,12 @@ function openCatalog(): SqlDb {
   };
 }
 
-test("busca vazia devolve os 14 drinks", () => {
+test("busca vazia devolve os 15 drinks", () => {
   const drinks = searchDrinksIn(openCatalog(), "   ");
-  assert.equal(drinks.length, 14);
+  assert.equal(drinks.length, 15);
   assert.ok(drinks.some((drink) => drink.name === "Caipirinha"));
   assert.ok(drinks.some((drink) => drink.name === "Limonada suíça"));
+  assert.ok(drinks.some((drink) => drink.name === "Soda de laranja"));
   const names = drinks.map((drink) => drink.name);
   assert.deepEqual(names, [...names].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)));
 });

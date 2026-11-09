@@ -11,7 +11,7 @@ import { subscribeDataChanged, syncIfSession } from "@/src/sync/sync";
 import { colors } from "@/src/theme/colors";
 import { layout } from "@/src/theme/layout";
 import { typography } from "@/src/theme/typography";
-import { DoseGlass, doseLayers } from "@/src/ui/dose-glass";
+import { DoseGlass, IngredientMark } from "@/src/ui/dose-glass";
 import { EmptyState } from "@/src/ui/empty-state";
 import { confirmHaptic } from "@/src/ui/haptics";
 import { PressableScale } from "@/src/ui/pressable-scale";
@@ -93,8 +93,6 @@ export default function DrinkScreen() {
     void syncIfSession();
   }
 
-  const layers = drink ? doseLayers(drink.ingredients) : [];
-  const opacityById = new Map(layers.map((layer) => [layer.id, layer.opacity]));
   const categoryIsAlcoholFree = drink?.category === "sem_alcool";
   const showAlcoholFree = drink ? !drink.alcoholic && !categoryIsAlcoholFree : false;
 
@@ -132,35 +130,33 @@ export default function DrinkScreen() {
               <Text style={styles.description}>{drink.description}</Text>
             </View>
 
-            <View style={styles.section}>
+            <View style={styles.recipe}>
+              <DoseGlass key={drink.id} ingredients={drink.ingredients} />
               <SectionHead
                 title="Ingredientes"
                 meta={String(drink.ingredients.length)}
               />
-              <View style={styles.dosage}>
-                {layers.length > 0 ? <DoseGlass layers={layers} /> : null}
-                <View style={styles.ingredients}>
-                  {drink.ingredients.map((item, index) => {
-                    const opacity = opacityById.get(item.id);
-                    const last = index === drink.ingredients.length - 1;
-                    return (
-                      <View
-                        key={item.id}
-                        style={[styles.ingredientRow, last && styles.rowLast]}
-                      >
-                        {opacity !== undefined ? (
-                          <View style={[styles.swatch, { opacity }]} />
-                        ) : (
-                          <View style={styles.swatchEmpty} />
-                        )}
-                        <Text style={styles.ingredientName}>{item.name}</Text>
-                        <Text style={styles.dose}>
-                          {item.amount} {item.unit}
-                        </Text>
+              <View style={styles.ingredients}>
+                {drink.ingredients.map((item, index) => {
+                  const last = index === drink.ingredients.length - 1;
+                  const topUp = item.unit === "completar o copo";
+                  const unit = Number(item.amount.replace(",", ".")) > 1
+                    ? item.unit.replace(/^colher\b/, "colheres")
+                    : item.unit;
+                  return (
+                    <View
+                      key={item.id}
+                      style={[styles.ingredientRow, last && styles.rowLast]}
+                    >
+                      <IngredientMark ingredient={item} />
+                      <Text style={styles.ingredientName}>{item.name}</Text>
+                      <View style={styles.doseGroup}>
+                        <Text style={styles.dose}>{topUp ? "Completar" : item.amount}</Text>
+                        <Text style={styles.doseUnit}>{topUp ? "o copo" : unit}</Text>
                       </View>
-                    );
-                  })}
-                </View>
+                    </View>
+                  );
+                })}
               </View>
             </View>
 
@@ -251,12 +247,12 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   content: {
-    paddingHorizontal: layout.screenPadding,
+    paddingHorizontal: layout.screenPadding + 4,
     gap: 28,
   },
   hero: {
     gap: 8,
-    paddingTop: 12,
+    paddingTop: 20,
   },
   eyebrow: {
     fontFamily: typography.label.fontFamily,
@@ -270,8 +266,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: typography.screenTitle.fontFamily,
-    fontSize: typography.screenTitle.fontSize,
-    lineHeight: typography.screenTitle.lineHeight,
+    fontSize: 36,
+    lineHeight: 44,
     color: colors.text,
     includeFontPadding: false,
   },
@@ -283,6 +279,9 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: 12,
+  },
+  recipe: {
+    gap: 4,
   },
   sectionHead: {
     flexDirection: "row",
@@ -306,16 +305,12 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     includeFontPadding: false,
   },
-  dosage: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 20,
-  },
   ingredients: {
-    flex: 1,
+    width: "100%",
   },
   ingredientRow: {
-    minHeight: layout.minTouch,
+    minHeight: 64,
+    paddingVertical: 10,
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
@@ -325,19 +320,6 @@ const styles = StyleSheet.create({
   rowLast: {
     borderBottomWidth: 0,
   },
-  swatch: {
-    width: 10,
-    height: 10,
-    borderRadius: 3,
-    backgroundColor: colors.amber,
-  },
-  swatchEmpty: {
-    width: 10,
-    height: 10,
-    borderRadius: 3,
-    borderWidth: 1,
-    borderColor: colors.textMuted,
-  },
   ingredientName: {
     flex: 1,
     fontFamily: typography.body.fontFamily,
@@ -346,14 +328,25 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   dose: {
-    flexShrink: 1,
     textAlign: "right",
     fontFamily: typography.label.fontFamily,
-    fontSize: typography.label.fontSize,
-    lineHeight: typography.label.lineHeight,
+    fontSize: 19,
+    lineHeight: 24,
     color: colors.amber,
     fontVariant: ["tabular-nums"],
     includeFontPadding: false,
+  },
+  doseGroup: {
+    maxWidth: "44%",
+    alignItems: "flex-end",
+    gap: 1,
+  },
+  doseUnit: {
+    ...typography.body,
+    fontSize: 12,
+    lineHeight: 17,
+    color: colors.textMuted,
+    textAlign: "right",
   },
   stepRow: {
     flexDirection: "row",

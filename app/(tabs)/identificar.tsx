@@ -25,6 +25,7 @@ import { DrinkCard } from "@/src/ui/drink-card";
 import { selectionHaptic } from "@/src/ui/haptics";
 import { PressableScale } from "@/src/ui/pressable-scale";
 import { Screen } from "@/src/ui/screen";
+import { PhotoIngredients } from "@/src/vision/photo-ingredients";
 
 const TRAY_HEIGHT = 76;
 
@@ -93,16 +94,7 @@ export default function IdentificarScreen() {
           ]}
           ListHeaderComponent={
             <View style={styles.header}>
-              <View accessibilityRole="text" style={styles.notice}>
-                <SymbolView
-                  name={{ ios: "camera", android: "photo_camera", web: "photo_camera" }}
-                  tintColor={colors.textMuted}
-                  size={16}
-                />
-                <Text style={styles.noticeText}>
-                  Identificar pela câmera chega no 2º bimestre
-                </Text>
-              </View>
+              <PhotoIngredients ingredients={ingredients} />
               {selected.length === 0 ? (
                 <Text style={styles.hint}>Selecione ao menos um ingrediente</Text>
               ) : null}
@@ -154,9 +146,12 @@ export default function IdentificarScreen() {
                 <Text style={styles.hint}>Nenhum drink usa esses ingredientes</Text>
               ) : null}
               {hits.length > 0 ? (
-                <Text style={styles.resultsLabel}>
-                  {plural(hits.length, "drink", "drinks")} com esses ingredientes
-                </Text>
+                <View style={styles.resultHeading}>
+                  <Text style={styles.resultsLabel}>
+                    {plural(hits.length, "drink", "drinks")} com esses ingredientes
+                  </Text>
+                  <Text style={styles.noticeText}>O percentual mostra a cobertura da receita.</Text>
+                </View>
               ) : null}
             </View>
           }
@@ -201,12 +196,7 @@ const styles = StyleSheet.create({
     gap: 22,
     marginBottom: 4,
   },
-  notice: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: -4,
-  },
+  resultHeading: { gap: 6 },
   noticeText: {
     flex: 1,
     fontFamily: typography.body.fontFamily,

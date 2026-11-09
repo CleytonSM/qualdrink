@@ -28,6 +28,14 @@ export function clearSelection(): void {
   }
 }
 
+/** A revisão da foto só altera a seleção quando a pessoa confirma. */
+export function addIngredients(ids: readonly string[]): void {
+  const next = [...new Set([...selectedIds, ...ids])];
+  if (next.length === selectedIds.length) return;
+  selectedIds = next;
+  for (const listener of listeners) listener();
+}
+
 export function subscribeSelection(listener: () => void): () => void {
   listeners.add(listener);
   return () => {

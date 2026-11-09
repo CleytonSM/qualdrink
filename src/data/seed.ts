@@ -1,18 +1,9 @@
-export type IngredientCategory =
-  | "destilado"
-  | "citrico"
-  | "mixer"
-  | "adocante"
-  | "fruta"
-  | "outro";
+import { ingredients } from "../../supabase/functions/_shared/catalog";
+
+export { ingredients };
+export type { IngredientCategory, IngredientRecord } from "../../supabase/functions/_shared/catalog";
 
 export type DrinkCategory = "brasileiro" | "classico" | "sem_alcool";
-
-export type IngredientRecord = {
-  id: string;
-  name: string;
-  category: IngredientCategory;
-};
 
 export type DrinkRecord = {
   id: string;
@@ -29,33 +20,6 @@ export type DoseRecord = {
   amount: string;
   unit: string;
 };
-
-export const ingredients: readonly IngredientRecord[] = [
-  { id: "cachaca", name: "Cachaça", category: "destilado" },
-  { id: "vodka", name: "Vodka", category: "destilado" },
-  { id: "gin", name: "Gin", category: "destilado" },
-  { id: "rum", name: "Rum", category: "destilado" },
-  { id: "tequila", name: "Tequila", category: "destilado" },
-  { id: "whisky", name: "Whisky", category: "destilado" },
-  { id: "licor_laranja", name: "Licor de laranja", category: "destilado" },
-  { id: "campari", name: "Campari", category: "destilado" },
-  { id: "vermute_rosso", name: "Vermute rosso", category: "destilado" },
-  { id: "aperol", name: "Aperol", category: "destilado" },
-  { id: "espumante", name: "Espumante", category: "destilado" },
-  { id: "limao", name: "Limão", category: "citrico" },
-  { id: "laranja", name: "Laranja", category: "citrico" },
-  { id: "agua_tonica", name: "Água tônica", category: "mixer" },
-  { id: "agua_com_gas", name: "Água com gás", category: "mixer" },
-  { id: "cola", name: "Refrigerante de cola", category: "mixer" },
-  { id: "ginger_beer", name: "Ginger beer", category: "mixer" },
-  { id: "suco_cranberry", name: "Suco de cranberry", category: "mixer" },
-  { id: "suco_abacaxi", name: "Suco de abacaxi", category: "mixer" },
-  { id: "leite_coco", name: "Leite de coco", category: "mixer" },
-  { id: "acucar", name: "Açúcar", category: "adocante" },
-  { id: "leite_condensado", name: "Leite condensado", category: "adocante" },
-  { id: "hortela", name: "Hortelã", category: "outro" },
-  { id: "gelo", name: "Gelo", category: "outro" },
-];
 
 export const drinks: readonly DrinkRecord[] = [
   {
@@ -209,6 +173,14 @@ export const drinks: readonly DrinkRecord[] = [
     alcoholic: false,
     steps: ["Bata o limão, o leite condensado e o gelo.", "Sirva em seguida."],
   },
+  {
+    id: "soda_laranja",
+    name: "Soda de laranja",
+    category: "sem_alcool",
+    description: "Suco de laranja com água com gás e gelo.",
+    alcoholic: false,
+    steps: ["Encha o copo com gelo.", "Adicione o suco de laranja.", "Complete com água com gás e misture delicadamente."],
+  },
 ];
 
 export const drinkIngredients: readonly DoseRecord[] = [
@@ -271,11 +243,14 @@ export const drinkIngredients: readonly DoseRecord[] = [
   { drinkId: "limonada_suica", ingredientId: "limao", amount: "2", unit: "unidades" },
   { drinkId: "limonada_suica", ingredientId: "leite_condensado", amount: "3", unit: "colheres de sopa" },
   { drinkId: "limonada_suica", ingredientId: "gelo", amount: "1", unit: "copo" },
+  { drinkId: "soda_laranja", ingredientId: "laranja", amount: "150", unit: "ml de suco" },
+  { drinkId: "soda_laranja", ingredientId: "agua_com_gas", amount: "100", unit: "ml" },
+  { drinkId: "soda_laranja", ingredientId: "gelo", amount: "1", unit: "copo" },
 ];
 
 export function assertSeed(): void {
-  if (drinks.length !== 14) {
-    throw new Error(`O catálogo precisa ter 14 drinks, veio ${drinks.length}.`);
+  if (drinks.length !== 15) {
+    throw new Error(`O catálogo precisa ter 15 drinks, veio ${drinks.length}.`);
   }
 
   const ingredientIds = new Set<string>();

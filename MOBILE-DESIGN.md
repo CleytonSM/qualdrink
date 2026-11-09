@@ -47,7 +47,7 @@ The spec calls amber "a cor do líquido nas doses". Every expressive element use
 | Screen | Signature |
 | --- | --- |
 | Identificar | Each result card fills with `amberWash` up to its coverage percent, with an amber meniscus line at the edge. The percent is set large (`measure`) with a small `%`, so the list scans by number. |
-| Receita | A glass stacks the `ml` doses bottom-up in pour order, amber layers fading by step. The legend swatches match the layers. Non-liquid doses get a hollow swatch. Drinks with no `ml` dose get no glass. |
+| Receita | A larger illustrated glass appears above the full-width ingredient list, including recipes without measured liquids. Liquid layers use ingredient colors; sugar grains, translucent ice, citrus pieces, mint leaves, and carbonation appear only when present in the recipe. Citrus measured in ml is juice, not a fruit piece. Matching ingredient marks accompany the list, with amount and unit on separate lines. The caption says `ml dosados` for the sum of explicit ml measures (including `ml de suco`), never the final drink volume. The illustration is schematic, including liquids used to top up the glass. |
 
 Buscar, Favoritos and Conta stay quiet.
 
@@ -55,7 +55,7 @@ Buscar, Favoritos and Conta stay quiet.
 
 | Role | Where |
 | --- | --- |
-| Color | `src/theme/colors.ts`, the only hex. `amberWash` is amber at 12% alpha, not a second palette. |
+| Color | `src/theme/colors.ts`, the only hex. `amberWash` is amber at 12% alpha. `ingredientColors` is reserved for recipe illustrations and their matching ingredient marks; app chrome retains the existing palette. |
 | Type | `src/theme/typography.ts`. Fraunces only for drink names and screen titles; Outfit elsewhere. `measure` (Outfit 600, 22) is only for the coverage percent. Counts and doses use tabular figures. |
 | Space, radii, 44pt floor, web column | `src/theme/layout.ts` |
 

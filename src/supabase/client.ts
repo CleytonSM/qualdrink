@@ -7,7 +7,10 @@ let client: SupabaseClient | null | undefined;
 let refreshBound = false;
 
 function publicEnv(name: "EXPO_PUBLIC_SUPABASE_URL" | "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY"): string {
-  const value = process.env[name];
+  // Expo só inclui no bundle acessos estáticos às variáveis EXPO_PUBLIC_.
+  const value = name === "EXPO_PUBLIC_SUPABASE_URL"
+    ? process.env.EXPO_PUBLIC_SUPABASE_URL
+    : process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   return typeof value === "string" ? value.trim() : "";
 }
 

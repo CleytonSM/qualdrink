@@ -9,6 +9,11 @@ tags: [architecture, design, app, mobile]
 
 # Introduction
 
+> Evolução v2 aprovada em 2026-11-08: a identificação de ingredientes por foto
+> está definida em [spec-vision-qualdrink-v2.md](spec-vision-qualdrink-v2.md).
+> Nesse escopo, ela substitui REQ-014, AC-012, CON-005 e as exclusões de câmera,
+> galeria e visão computacional desta v1. Os demais contratos continuam válidos.
+
 Esta especificação define a primeira versão do QualDrink, aplicativo mobile em que a pessoa descobre a receita de um drink pelo nome ou pelos ingredientes que reconhece. Ela é a fonte única para as fases de implementação. Visão computacional fica fora desta versão e entra só no 2º bimestre, sem mudar o modelo de dados nem a navegação definidos aqui.
 
 ## 1. Purpose & Scope
@@ -632,7 +637,7 @@ Arquivo local de segredo: `.env`. Não versionar `.env`. Versionar `.env.example
 
 ## 5. Acceptance Criteria
 
-- **AC-001**: Given o primeiro lançamento sem rede, When a aba Buscar abre, Then a lista contém os 14 drinks do catálogo, incluindo Caipirinha e Limonada suíça.
+- **AC-001**: Given o primeiro lançamento sem rede, When a aba Buscar abre, Then a lista contém os 15 drinks do catálogo, incluindo Caipirinha, Limonada suíça e Soda de laranja.
 - **AC-002**: Given a Buscar aberta, When a pessoa digita `gin`, Then Gin tônica aparece. When digita `suica`, Then Limonada suíça aparece. When digita `xyz`, Then a tela mostra `Nenhum drink com esse nome`.
 - **AC-003**: Given Identificar sem marcas, When a tela renderiza, Then mostra `Selecione ao menos um ingrediente` e nenhum resultado de drink.
 - **AC-004**: Given os ingredientes Cachaça, Limão, Açúcar e Gelo marcados, When a identificação roda, Then Caipirinha é o primeiro resultado com cobertura 100 por cento e texto `4 de 4 ingredientes`.
@@ -654,7 +659,7 @@ Arquivo local de segredo: `.env`. Não versionar `.env`. Versionar `.env.example
 - **Test Data Management**: O seed da seção 4.8 é o único catálogo de teste. Favoritos de teste usam uma conta criada para a avaliação e podem ser apagados no painel do Supabase ao final. Não usar a service role dentro do aplicativo de teste.
 - **CI/CD Integration**: Sem pipeline obrigatório nesta versão. O aceite é o roteiro manual da seção 10.
 - **Coverage Requirements**: 100 por cento dos caminhos de `foldName` e da função pura de conflito de favorito. Sem meta de cobertura global.
-- **Performance Testing**: Catálogo de 14 drinks. Sem teste de carga. A busca e a identificação devem responder no mesmo gesto, sem indicador de progresso, em um aparelho Android intermediário.
+- **Performance Testing**: Catálogo de 15 drinks. Sem teste de carga. A busca e a identificação devem responder no mesmo gesto, sem indicador de progresso, em um aparelho Android intermediário.
 
 Casos mínimos de unidade:
 
@@ -724,7 +729,7 @@ Busca:
 
 | Texto | Resultados esperados |
 | --- | --- |
-| vazio | 14 drinks, ordem alfabética pelo nome exibido |
+| vazio | 15 drinks, ordem alfabética pelo nome exibido |
 | `mojito` | Mojito e Mojito sem álcool |
 | `  NEGRONI ` | Negroni |
 | `pinha` | nenhum; o nome persistido é Piña colada, cujo fold é `pina colada` |
@@ -751,7 +756,7 @@ A versão 1 está conforme quando todos os itens abaixo são verdadeiros.
 3. O PostgreSQL contém as quatro tabelas, RLS ligado, catálogo sem escrita para `authenticated`, e favoritos restritos a `auth.uid()`.
 4. `.env` não está versionado. A service role não está no cliente.
 5. O aviso de câmera está na aba Identificar e nenhuma dependência de visão computacional foi adicionada.
-6. Os 14 drinks e as doses da seção 4.8 existem no aparelho após o primeiro lançamento limpo.
+6. Os 15 drinks e suas doses existem no aparelho após o primeiro lançamento limpo.
 7. Os advisors de segurança do Supabase não apontam tabela `public` sem RLS.
 
 Roteiro manual mínimo, nesta ordem: instalar e abrir offline; buscar `suica`; identificar Cachaça + Limão + Açúcar + Gelo; abrir a receita; favoritar; matar e reabrir o app; criar conta; sincronizar; repetir o login em outro aparelho ou após limpar os dados locais mantendo a conta; desfavoritar; sincronizar de novo; confirmar a ausência na lista.
